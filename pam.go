@@ -1,7 +1,7 @@
 package main
 
 import (
-	"fmt"
+	"html/template"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -16,14 +16,23 @@ import (
 var path string
 
 func init() {
-	// Check if ~/.pam exists; create a new one if not.
+	// Check if ~/.pam exists
 	usr, err := user.Current()
 	if err != nil {
 		log.Fatal(err)
 	}
 	path = filepath.Join(usr.HomeDir, ".pam")
 	if _, err = os.Stat(path); os.IsNotExist(err) {
+		log.Printf(".pam not found, creating %s...", path)
 		if err = os.Mkdir(path, os.ModePerm); err != nil {
+			log.Fatal(err)
+		}
+	}
+	// Create library folder for document files
+	libPath := filepath.Join(path, "library")
+	if _, err = os.Stat(libPath); os.IsNotExist(err) {
+		log.Printf("library not found in ~/.pam, creating %s...", libPath)
+		if err = os.Mkdir(libPath, os.ModePerm); err != nil {
 			log.Fatal(err)
 		}
 	}
@@ -31,15 +40,18 @@ func init() {
 
 func main() {
 	http.HandleFunc("/", mainHandler)
+	fs := http.FileServer(http.Dir("./resources/"))
+	http.Handle("/resources/", http.StripPrefix("/resources/", fs))
 	go openWeb("http://localhost:8080/")
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }
 
 func mainHandler(w http.ResponseWriter, r *http.Request) {
-	papers := listPapers(path)
-	for _, p := range papers {
-		fmt.Fprintf(w, "%s\n", p)
+	t, err := template.ParseFiles("resources/index.html")
+	if err != nil {
+		log.Fatal(err)
 	}
+	t.Execute(w, nil)
 }
 
 // openWeb executes a command that opens the default browser with the argument URL.

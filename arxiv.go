@@ -1,8 +1,8 @@
 package main
 
 import (
+	"fmt"
 	"net/http"
-	"sync"
 )
 
 const (
@@ -19,16 +19,17 @@ func search(field, query string, maxResults int) error {
 		defer resp.Body.Close()
 	}
 
-
+	return nil
 }
 
 func SearchAll(query string, maxResults int) error {
+	return nil
 }
 
 func SearchTitle(query string, maxResults int) error {
-
+	return nil
 }
 
 func SearchAuthor(query string, maxResults int) error {
-
+	return nil
 }
