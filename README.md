@@ -1,2 +1,2 @@
 # pam
-Papaer Manager
+Paper Manager
