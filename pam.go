@@ -4,6 +4,7 @@ import (
 	"html/template"
 	"io/ioutil"
 	"log"
+	"math/rand"
 	"net/http"
 	"os"
 	"os/exec"
@@ -26,11 +27,8 @@ var pamQuotes = []string{
 	"It's not about who you've been with. It's about who you end up with. Sometimes the heart doesn't know what it wants until it finds what it wants.",
 	"Wanna count her fingers and toes again?",
 	"I cannot wait for that joke to be over.",
-}
-
-type Pam struct {
-	PamQuote string
-	Titles   []string
+	"Oscar and the warehouse guy! Go Oscar! Go gay warehouse guy!",
+	"Don't do the twirl.",
 }
 
 // ~/.pam stores all metadata and PDF documents for the papers.
@@ -77,7 +75,7 @@ func mainHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	t.Execute(w, nil)
+	t.Execute(w, NewPam())
 }
 
 func paperHandler(w http.ResponseWriter, r *http.Request) {
@@ -131,6 +129,18 @@ func openWeb(url string) {
 	args = append(args, url)
 	if err := exec.Command(cmd, args...).Start(); err != nil {
 		log.Fatal(err)
+	}
+}
+
+type Pam struct {
+	PamQuote string
+	Titles   []string
+}
+
+func NewPam() *Pam {
+	return &Pam{
+		PamQuote: pamQuotes[rand.Intn(len(pamQuotes))],
+		Titles:   listPapers(path),
 	}
 }
 
