@@ -1,0 +1,77 @@
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{.Title}}</title>
+    <link rel="stylesheet" href="/resources/css/style.min.css">
+</head>
+
+<body>
+    <section class="hero is-info is-fullheight">
+        <div class="hero-body">
+            <div class="container">
+                <!-- Title and authors -->
+                <h1 class="title">{{.Title}}</h1>
+                <h2 class="subtitle">{{join .Authors ", "}}</h2>
+                <div class="tile is-ancestor">
+                    <!-- Abstract -->
+                    <div class="tile is-parent">
+                        <div class="tile is-child notification is-primary">{{.Abstract}}</div>
+                    </div>
+                    <div class="tile is-vertical is-parent">
+                        <!-- Link, file, tags, favorite -->
+                        <div class="tile is-child notification is-success">
+                            <!-- Tags for this paper -->
+
+                            <!-- Checkbox for whether this paper is favorite -->
+                            <div class="field is-grouped">
+                                <div class="control">
+                                    <label class="checkbox">
+                                        <input type="checkbox" {{checked .Favorite}}> Favorite
+                                    </label>
+                                </div>
+                                <div class="control">
+                                    <label class="checkbox">
+                                        <input type="checkbox" {{checked .Read}}> Read
+                                    </label>
+                                </div>
+                                <div class="control">
+                                    <label class="checkbox">
+                                        <input type="checkbox" {{checked .Master}}> Master
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="field">
+                                <div class="control">
+                                    <button class="button is-success is-inverted">Save</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Note -->
+                        <div class="tile is-child notification is-warning">
+                            <div class="field">
+                                <label class="label">Note</label>
+                                <div class="control">
+                                    <textarea class="textarea" placeholder="Textarea">{{.Note}}</textarea>
+                                </div>
+                            </div>
+                            <div class="field is-grouped">
+                                <div class="control">
+                                    <button class="button is-success">Save</button>
+                                </div>
+                                <div class="control">
+                                    <button class="button is-danger">Delete</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+</body>
+
+</html>
