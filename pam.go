@@ -58,6 +58,7 @@ func init() {
 }
 
 func main() {
+	rand.Seed(0)
 	fs := http.FileServer(http.Dir("./resources/"))
 	http.Handle("/resources/", http.StripPrefix("/resources/", fs))
 	http.HandleFunc("/", mainHandler)
