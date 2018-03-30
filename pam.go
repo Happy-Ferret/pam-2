@@ -24,7 +24,7 @@ var pamQuotes = []string{
 	"So everyone here knows pirate code?",
 	"Dwight! What are you doing? We've only been in here for like two seconds!",
 	"You can flirt with someone to get what you want and also be attracted to them. How do you think we got together?",
-	"It's not about who you've been with. It's about who you end up with. Sometimes the heart doesn't know what it wants until it finds what it wants.",
+	"Sometimes the heart doesn't know what it wants until it finds what it wants.",
 	"Wanna count her fingers and toes again?",
 	"I cannot wait for that joke to be over.",
 	"Oscar and the warehouse guy! Go Oscar! Go gay warehouse guy!",
@@ -33,6 +33,42 @@ var pamQuotes = []string{
 
 // ~/.pam stores all metadata and PDF documents for the papers.
 var path string
+
+type Pam struct {
+	PamQuote string
+	Papers   []*Paper
+}
+
+func NewPam() (*Pam, error) {
+	papers, err := importPapers(path)
+	if err != nil {
+		return nil, err
+	}
+	return &Pam{
+		PamQuote: pamQuotes[rand.Intn(len(pamQuotes))],
+		Papers:   papers,
+	}, nil
+}
+
+// listPapers returns a slice of file names (only PDF) in the path.
+func importPapers(dir string) ([]*Paper, error) {
+	files, err := ioutil.ReadDir(dir)
+	if err != nil {
+		log.Fatal(err)
+	}
+	papers := []*Paper{}
+	for _, f := range files {
+		filename := f.Name()
+		if filepath.Ext(filename) == ".json" {
+			p, err := FromJSON(filepath.Join(dir, filename))
+			if err != nil {
+				return nil, err
+			}
+			papers = append(papers, p)
+		}
+	}
+	return papers, nil
+}
 
 func init() {
 	// Check if ~/.pam exists
@@ -72,11 +108,17 @@ func mainHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	t, err := template.New("index").Parse(string(tmpl))
+	t, err := template.New("index").Funcs(template.FuncMap{
+		"join": strings.Join,
+	}).Parse(string(tmpl))
 	if err != nil {
 		log.Fatal(err)
 	}
-	t.Execute(w, NewPam())
+	pam, err := NewPam()
+	if err != nil {
+		log.Fatal(err)
+	}
+	t.Execute(w, pam)
 }
 
 func paperHandler(w http.ResponseWriter, r *http.Request) {
@@ -131,35 +173,4 @@ func openWeb(url string) {
 	if err := exec.Command(cmd, args...).Start(); err != nil {
 		log.Fatal(err)
 	}
-}
-
-type Pam struct {
-	PamQuote string
-	Titles   []string
-}
-
-func NewPam() *Pam {
-	return &Pam{
-		PamQuote: pamQuotes[rand.Intn(len(pamQuotes))],
-		Titles:   listPapers(path),
-	}
-}
-
-// listPapers returns a slice of file names (only PDF) in the path.
-func listPapers(dir string) []string {
-	// TODO: check/create metadata for performance
-	// TODO: list the papers in order of last opened; alphabetical otherwise.
-
-	files, err := ioutil.ReadDir(dir)
-	if err != nil {
-		log.Fatal(err)
-	}
-	list := []string{}
-	for _, f := range files {
-		filename := f.Name()
-		if filepath.Ext(filename) == ".pdf" {
-			list = append(list, filename)
-		}
-	}
-	return list
 }

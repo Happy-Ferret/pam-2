@@ -8,13 +8,14 @@
 </head>
 
 <body>
-    <section class="hero is-primary is-medium">
+    <section class="hero is-primary is-large">
             <div class="hero-head">
                     <nav class="navbar">
                       <div class="container">
                         <div class="navbar-brand">
                           <a class="navbar-item">
-                            <img src="https://bulma.io/images/bulma-type-white.png" alt="Logo">
+                            <!-- Put logo here -->
+                            <!-- <img src="https://bulma.io/images/bulma-type-white.png" alt="Logo"> -->
                           </a>
                         </div>
                         <div class="navbar-end">
@@ -31,9 +32,52 @@
             <div class="container has-text-centered">
                 <h1 class="title">Pam</h1>
                 <h2 class="subtitle">"{{.PamQuote}}"</h2>
+                <div class="columns is-desktop">
+                    <div class="column is-half is-offset-one-quarter">
+                            <div class="field is-grouped">
+                                    <p class="control is-expanded">
+                                      <input class="input" type="text" placeholder="Search ArXiv">
+                                    </p>
+                                  </div>
+                                  <div class="field is-grouped is-grouped-centered">
+                                        <p class="control">
+                                          <a class="button is-success">
+                                            Search
+                                          </a>
+                                        </p>
+                                        <p class="control">
+                                          <a class="button is-warning">
+                                            Hey, Pam!
+                                          </a>
+                                        </p>
+                                      </div>
+                    </div>                   
+                </div>
             </div>
         </div>
     </section>
+    <section class="hero is-info">
+            <div class="hero-body">
+              <div class="container has-text-centered">
+                {{range $paper := .Papers}}
+                    <div class="box">
+                        <article class="media">
+                        <div class="media-content">
+                            <div class="content">
+                            <p>
+                                <strong>{{$paper.Title}}</strong>
+                                <br>
+                                {{join $paper.Authors ", "}}
+                            </p>
+                            </div>
+                        </div>
+                        </article>
+                    </div>
+                {{end}}
+              </div>
+            </div>
+          </section>
+          
     <footer class="footer">
         <div class="container">
             <div class="content has-text-centered">
