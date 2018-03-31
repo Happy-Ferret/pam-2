@@ -12,6 +12,7 @@ import (
 	"path/filepath"
 	"runtime"
 	"strings"
+	"time"
 )
 
 var pamQuotes = []string{
@@ -33,14 +34,14 @@ var pamQuotes = []string{
 
 // ~/.pam stores all metadata and PDF documents for the papers.
 var (
-	path string
+	path      string
 	indexTmpl string
 	paperTmpl string
 )
 
 type Pam struct {
 	PamQuote string
-	Papers   []*Paper
+	Papers   Papers
 }
 
 func NewPam() (*Pam, error) {
@@ -55,7 +56,7 @@ func NewPam() (*Pam, error) {
 }
 
 // listPapers returns a slice of file names (only PDF) in the path.
-func importPapers(dir string) ([]*Paper, error) {
+func importPapers(dir string) (Papers, error) {
 	files, err := ioutil.ReadDir(dir)
 	if err != nil {
 		log.Fatal(err)
@@ -110,7 +111,7 @@ func init() {
 }
 
 func main() {
-	rand.Seed(0)
+	rand.Seed(time.Now().UnixNano()) // for random Pam quotes.
 	fs := http.FileServer(http.Dir("./resources/"))
 	http.Handle("/resources/", http.StripPrefix("/resources/", fs))
 	http.HandleFunc("/", mainHandler)
@@ -148,6 +149,8 @@ func paperHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// TODO: get paper name from response
+
+	// Find the paper from the title.
 
 	// Placeholder for visuals
 	p := &Paper{
