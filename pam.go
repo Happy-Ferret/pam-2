@@ -32,7 +32,11 @@ var pamQuotes = []string{
 }
 
 // ~/.pam stores all metadata and PDF documents for the papers.
-var path string
+var (
+	path string
+	indexTmpl string
+	paperTmpl string
+)
 
 type Pam struct {
 	PamQuote string
@@ -91,6 +95,18 @@ func init() {
 			log.Fatal(err)
 		}
 	}
+	// Load index.tmpl
+	tmpl, err := ioutil.ReadFile("resources/index.tmpl")
+	if err != nil {
+		log.Fatal(err)
+	}
+	indexTmpl = string(tmpl)
+	// Load paper.tmpl
+	tmpl, err = ioutil.ReadFile("resources/paper.tmpl")
+	if err != nil {
+		log.Fatal(err)
+	}
+	paperTmpl = string(tmpl)
 }
 
 func main() {
@@ -98,19 +114,15 @@ func main() {
 	fs := http.FileServer(http.Dir("./resources/"))
 	http.Handle("/resources/", http.StripPrefix("/resources/", fs))
 	http.HandleFunc("/", mainHandler)
-	http.HandleFunc("/paper/", paperHandler)
+	http.HandleFunc("/p/", paperHandler)
 	go openWeb("http://localhost:8080/")
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }
 
 func mainHandler(w http.ResponseWriter, r *http.Request) {
-	tmpl, err := ioutil.ReadFile("resources/index.tmpl")
-	if err != nil {
-		log.Fatal(err)
-	}
 	t, err := template.New("index").Funcs(template.FuncMap{
 		"join": strings.Join,
-	}).Parse(string(tmpl))
+	}).Parse(indexTmpl)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -122,10 +134,6 @@ func mainHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func paperHandler(w http.ResponseWriter, r *http.Request) {
-	tmpl, err := ioutil.ReadFile("resources/paper.tmpl")
-	if err != nil {
-		log.Fatal(err)
-	}
 	t, err := template.New("paper").Funcs(template.FuncMap{
 		"join": strings.Join,
 		"checked": func(checked bool) string {
@@ -134,7 +142,7 @@ func paperHandler(w http.ResponseWriter, r *http.Request) {
 			}
 			return ""
 		},
-	}).Parse(string(tmpl))
+	}).Parse(paperTmpl)
 	if err != nil {
 		log.Fatal(err)
 	}
