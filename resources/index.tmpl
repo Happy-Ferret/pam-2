@@ -6,34 +6,38 @@
     <link rel="stylesheet" href="/resources/css/style.min.css">
   </head>
   <body>
-    <section class="hero is-primary is-medium">
+    <section class="hero is-info is-medium">
       <div class="hero-body">
         <div class="container has-text-centered">
           <h1 class="title">Pam</h1>
           <h2 class="subtitle">"{{.PamQuote}}"</h2>
           <div class="columns is-desktop">
             <div class="column is-half is-offset-one-quarter">
-              <div class="field is-grouped">
-                <p class="control is-expanded">
-                  <input class="input" type="text" placeholder="Search ArXiv (Coming soon!)">
-                </p>
-              </div>
-              <div class="field is-grouped is-grouped-centered">
-                <!-- Search button -->
-                <p class="control">
-                  <a class="button is-success">Search</a>
-                </p>
-                <!-- Voice search button -->
-                <p class="control">
-                  <a class="button is-warning">Hey, Pam!</a>
-                </p>
-              </div>
+
+              <form action="/search" method="post">
+                <div class="field is-grouped">
+                  <p class="control is-expanded">
+                    <input class="input" type="text" placeholder="Search ArXiv (Coming soon!)" name="search">
+                  </p>
+                </div>
+                <div class="field is-grouped is-grouped-centered">
+                  <!-- Search button -->
+                  <p class="control">
+                    <a class="button is-success">Search</a>
+                  </p>
+                  <!-- Voice search button -->
+                  <p class="control">
+                    <a class="button is-warning">Hey, Pam!</a>
+                  </p>
+                </div>
+              </form>    
+
             </div>                   
           </div>
         </div>
       </div>
     </section>
-    <section class="hero is-info">
+    <section class="hero is-primary">
       <div class="hero-body">
         <div class="container has-text-centered">
           {{if eq (len .Papers) 0}}

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"html/template"
 	"io/ioutil"
 	"log"
@@ -71,17 +72,22 @@ func main() {
 }
 
 func mainHandler(w http.ResponseWriter, r *http.Request) {
-	t, err := template.New("index").Funcs(template.FuncMap{
-		"join": strings.Join,
-	}).Parse(indexTmpl)
-	if err != nil {
-		log.Fatal(err)
+	if r.Method == "GET" {
+		t, err := template.New("index").Funcs(template.FuncMap{
+			"join": strings.Join,
+		}).Parse(indexTmpl)
+		if err != nil {
+			log.Fatal(err)
+		}
+		if err = pam.Reload(); err != nil {
+			log.Fatal(err)
+		}
+		pam.Reload()
+		t.Execute(w, pam)
+	} else if r.Method == "POST" {
+		r.ParseForm()
+		fmt.Println(r.Form["search"])
 	}
-	if err = pam.Reload(); err != nil {
-		log.Fatal(err)
-	}
-	pam.Reload()
-	t.Execute(w, pam)
 }
 
 func paperHandler(w http.ResponseWriter, r *http.Request) {
