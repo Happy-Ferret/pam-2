@@ -2,32 +2,11 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Pam
-    </title>
+    <title>Pam</title>
     <link rel="stylesheet" href="/resources/css/style.min.css">
   </head>
   <body>
     <section class="hero is-primary is-medium">
-      <div class="hero-head">
-        <nav class="navbar">
-          <div class="container">
-            <div class="navbar-brand">
-              <a class="navbar-item">
-                <!-- Put logo here -->
-                <!-- <img src="https://bulma.io/images/bulma-type-white.png" alt="Logo"> -->
-              </a>
-            </div>
-            <div class="navbar-end">
-              <!-- Help button for instructions -->
-              <span class="navbar-item">
-                <a class="button is-info">
-                  <span>Help</span>
-                </a>
-              </span>
-            </div>
-          </div>
-        </nav>
-      </div>
       <div class="hero-body">
         <div class="container has-text-centered">
           <h1 class="title">Pam</h1>
@@ -36,7 +15,7 @@
             <div class="column is-half is-offset-one-quarter">
               <div class="field is-grouped">
                 <p class="control is-expanded">
-                  <input class="input" type="text" placeholder="Search ArXiv">
+                  <input class="input" type="text" placeholder="Search ArXiv (Coming soon!)">
                 </p>
               </div>
               <div class="field is-grouped is-grouped-centered">
@@ -66,7 +45,7 @@
                   <div class="media-content">
                     <div class="content">
                       <p>
-                        <strong>{{$paper.Title}}</strong><br>
+                        <strong><a href="/p/{{$paper.Title}}">{{$paper.Title}}</a></strong><br>
                         {{join $paper.Authors ", "}}
                       </p>
                     </div>

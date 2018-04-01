@@ -1,17 +1,10 @@
 package main
 
 import (
-	"html/template"
 	"io/ioutil"
 	"log"
 	"math/rand"
-	"net/http"
-	"os"
-	"os/exec"
-	"os/user"
 	"path/filepath"
-	"runtime"
-	"strings"
 	"time"
 )
 
@@ -32,13 +25,6 @@ var pamQuotes = []string{
 	"Don't do the twirl.",
 }
 
-// ~/.pam stores all metadata and PDF documents for the papers.
-var (
-	path      string
-	indexTmpl string
-	paperTmpl string
-)
-
 type Pam struct {
 	PamQuote string
 	Papers   Papers
@@ -49,10 +35,28 @@ func NewPam() (*Pam, error) {
 	if err != nil {
 		return nil, err
 	}
+	papers.SortByTitle()
 	return &Pam{
-		PamQuote: pamQuotes[rand.Intn(len(pamQuotes))],
+		PamQuote: randPamQuote(),
 		Papers:   papers,
 	}, nil
+}
+
+func (p *Pam) Reload() error {
+	p.PamQuote = randPamQuote()
+	papers, err := importPapers(path)
+	if err != nil {
+		return err
+	}
+	papers.SortByTitle()
+	p.Papers = papers
+	return nil
+}
+
+// randPamQuote returns a random Pam Quote.
+func randPamQuote() string {
+	rand.Seed(time.Now().UnixNano())
+	return pamQuotes[rand.Intn(len(pamQuotes))]
 }
 
 // listPapers returns a slice of file names (only PDF) in the path.
@@ -73,115 +77,4 @@ func importPapers(dir string) (Papers, error) {
 		}
 	}
 	return papers, nil
-}
-
-func init() {
-	// Check if ~/.pam exists
-	usr, err := user.Current()
-	if err != nil {
-		log.Fatal(err)
-	}
-	path = filepath.Join(usr.HomeDir, ".pam")
-	if _, err = os.Stat(path); os.IsNotExist(err) {
-		log.Printf(".pam not found, creating %s...", path)
-		if err = os.Mkdir(path, os.ModePerm); err != nil {
-			log.Fatal(err)
-		}
-	}
-	// Create library folder for document files
-	libPath := filepath.Join(path, "library")
-	if _, err = os.Stat(libPath); os.IsNotExist(err) {
-		log.Printf("library not found in ~/.pam, creating %s...", libPath)
-		if err = os.Mkdir(libPath, os.ModePerm); err != nil {
-			log.Fatal(err)
-		}
-	}
-	// Load index.tmpl
-	tmpl, err := ioutil.ReadFile("resources/index.tmpl")
-	if err != nil {
-		log.Fatal(err)
-	}
-	indexTmpl = string(tmpl)
-	// Load paper.tmpl
-	tmpl, err = ioutil.ReadFile("resources/paper.tmpl")
-	if err != nil {
-		log.Fatal(err)
-	}
-	paperTmpl = string(tmpl)
-}
-
-func main() {
-	rand.Seed(time.Now().UnixNano()) // for random Pam quotes.
-	fs := http.FileServer(http.Dir("./resources/"))
-	http.Handle("/resources/", http.StripPrefix("/resources/", fs))
-	http.HandleFunc("/", mainHandler)
-	http.HandleFunc("/p/", paperHandler)
-	go openWeb("http://localhost:8080/")
-	log.Fatal(http.ListenAndServe(":8080", nil))
-}
-
-func mainHandler(w http.ResponseWriter, r *http.Request) {
-	t, err := template.New("index").Funcs(template.FuncMap{
-		"join": strings.Join,
-	}).Parse(indexTmpl)
-	if err != nil {
-		log.Fatal(err)
-	}
-	pam, err := NewPam()
-	if err != nil {
-		log.Fatal(err)
-	}
-	t.Execute(w, pam)
-}
-
-func paperHandler(w http.ResponseWriter, r *http.Request) {
-	t, err := template.New("paper").Funcs(template.FuncMap{
-		"join": strings.Join,
-		"checked": func(checked bool) string {
-			if checked {
-				return "checked"
-			}
-			return ""
-		},
-	}).Parse(paperTmpl)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	// TODO: get paper name from response
-
-	// Find the paper from the title.
-
-	// Placeholder for visuals
-	p := &Paper{
-		Title: "Convolution by Evolution: Differentiable Pattern Producing Networks",
-		Authors: []string{"Chrisantha Fernando", "Dylan Banarse", "Malcolm Reynolds",
-			"Frederic Besse", "David Pfau", "Max Jaderberg", "Marc Lanctot", "Daan Wierstra"},
-		Abstract: "In this work we introduce a differentiable version of the Compositional Pattern Producing Network, called the DPPN. Unlike a standard CPPN, the topology of a DPPN is evolved but the weights are learned. A Lamarckian algorithm, that combines evolution and learning, produces DPPNs to reconstruct an image. Our main result is that DPPNs can be evolved/trained to compress the weights of a denoising autoencoder from 157684 to roughly 200 parameters, while achieving a reconstruction accuracy comparable to a fully connected network with more than two orders of magnitude more parameters. The regularization ability of the DPPN allows it to rediscover (approximate) convolutional network architectures embedded within a fully connected architecture. Such convolutional architectures are the current state of the art for many computer vision applications, so it is satisfying that DPPNs are capable of discovering this structure rather than having to build it in by design. DPPNs exhibit better generalization when tested on the Omniglot dataset after being trained on MNIST, than directly encoded fully connected autoencoders. DPPNs are therefore a new framework for integrating learning and evolution. ",
-		Note:     "This is my note for this paper!",
-		Favorite: true,
-		Read:     false,
-		Master:   false,
-	}
-
-	t.Execute(w, p)
-}
-
-// openWeb executes a command that opens the default browser with the argument URL.
-func openWeb(url string) {
-	var cmd string
-	var args []string
-	switch runtime.GOOS {
-	case "windows":
-		cmd = "cmd"
-		args = []string{"/c", "start"}
-	case "darwin":
-		cmd = "open"
-	default: // "linux", "freebsd", "openbsd", "netbsd"
-		cmd = "xdg-open"
-	}
-	args = append(args, url)
-	if err := exec.Command(cmd, args...).Start(); err != nil {
-		log.Fatal(err)
-	}
 }

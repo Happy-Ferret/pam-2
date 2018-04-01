@@ -59,3 +59,11 @@ func (p Papers) SortByTitle() {
 func (p Papers) SortByAuthor() {
 	sort.Sort(byAuthor(p))
 }
+
+func (p Papers) SearchByTitle(title string) *Paper {
+	i := sort.Search(len(p), func(i int) bool { return p[i].Title >= title })
+	if i < len(p) && p[i].Title == title {
+		return p[i]
+	}
+	return nil
+}
