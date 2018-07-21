@@ -1,4 +1,4 @@
 # Pam
-Paper manager
-## Design
+
+## Plan (remove when project is finished)
 ![pam](resources/images/pam.png)
